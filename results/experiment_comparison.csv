@@ -1,0 +1,3 @@
+experiment_id,architecture,resolution,batch_size,learning_rate,augmentation,fine_tuning,duration_seconds,validation_accuracy,validation_sensitivity,validation_specificity,validation_f1,validation_roc_auc,validation_pr_auc
+E0-head,EfficientNetB0,224x224,32,0.001,flip; rotation .04; zoom/contrast .08,frozen backbone,1253.1974821090698,0.9655629139072848,0.961038961038961,0.9702702702702702,0.9660574412532638,0.9948332748332749,0.9955433817634752
+E1-finetune,EfficientNetB0,224x224,32,1e-05,flip; rotation .04; zoom/contrast .08,upper 40 layers; BatchNorm frozen,1041.5911622047424,0.9748344370860927,0.9714285714285714,0.9783783783783784,0.9752281616688396,0.9969252369252368,0.9972003248799893
