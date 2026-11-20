@@ -1,0 +1,23 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.env.local
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Artifacts
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/.gitignore
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
