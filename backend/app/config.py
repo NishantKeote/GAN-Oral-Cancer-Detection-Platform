@@ -17,6 +17,10 @@ PROJECT_ROOT = BACKEND_DIR.parent
 class Settings(BaseSettings):
     """Central configuration settings for the OSCC Backend application."""
 
+    # Project Anchors
+    PROJECT_ROOT: Path = Field(default=PROJECT_ROOT, description="Root directory of the project")
+    BACKEND_DIR: Path = Field(default=BACKEND_DIR, description="Backend directory")
+
     # Environment & Server
     ENV: str = Field(default="development", description="Runtime environment (development, production, testing)")
     DEBUG: bool = Field(default=True, description="Enable debug mode and detailed logs")
@@ -25,7 +29,15 @@ class Settings(BaseSettings):
 
     # CORS Configuration
     CORS_ORIGINS: Union[List[str], str] = Field(
-        default=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"],
+        default=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+            "https://trimester-tapping-bagginess.ngrok-free.dev",
+        ],
         description="Allowed CORS origins for the frontend",
     )
 
@@ -65,7 +77,7 @@ class Settings(BaseSettings):
 
     # Groq LLM API
     GROQ_API_KEY: str = Field(default="", description="Groq API key for report generation")
-    GROQ_MODEL: str = Field(default="llama-3.3-70b-versatile", description="Target Groq model identifier")
+    GROQ_MODEL: str = Field(default="openai/gpt-oss-120b", description="Target Groq model identifier")
 
     model_config = SettingsConfigDict(
         env_file=".env",

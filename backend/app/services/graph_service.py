@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 import json
 import re
 import threading
+import ssl
+import certifi
 from typing import Any, Dict, List, Optional
 from app.config import settings
 from app.core.logging import logger
@@ -111,9 +113,15 @@ class GraphService:
             logger.info("Connecting to Neo4j database instance: %s (database='%s')", masked_uri, self.database)
 
             try:
+                ssl_context = ssl.create_default_context(
+                    cafile=certifi.where()
+                )
+
                 driver = GraphDatabase.driver(
-                    self.uri,
+                    self.uri.replace("neo4j+s://", "neo4j://", 1),
                     auth=(self.username, self.password),
+                    encrypted=True,
+                    ssl_context=ssl_context,
                 )
                 with driver.session(database=self.database) as session:
                     session.run("RETURN 1 AS ok").single()
