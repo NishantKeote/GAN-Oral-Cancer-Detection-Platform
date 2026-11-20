@@ -9,6 +9,10 @@ from typing import List, Union
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Base directory anchors (stable regardless of execution working directory)
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BACKEND_DIR.parent
+
 
 class Settings(BaseSettings):
     """Central configuration settings for the OSCC Backend application."""
@@ -25,21 +29,21 @@ class Settings(BaseSettings):
         description="Allowed CORS origins for the frontend",
     )
 
-    # ML Model & Knowledge Base Artifact Paths
+    # ML Model & Knowledge Base Artifact Paths (Anchored to Project Root)
     MODEL_PATH: Path = Field(
-        default=Path("../models/best_efficientnetb0.keras"),
+        default_factory=lambda: PROJECT_ROOT / "models" / "best_efficientnetb0.keras",
         description="Path to trained EfficientNetB0 Keras model file",
     )
     FAISS_PATH: Path = Field(
-        default=Path("../knowledge_base/oscc_literature.faiss"),
+        default_factory=lambda: PROJECT_ROOT / "knowledge_base" / "oscc_literature.faiss",
         description="Path to FAISS vector index file",
     )
     METADATA_PATH: Path = Field(
-        default=Path("../knowledge_base/chunk_metadata.json"),
+        default_factory=lambda: PROJECT_ROOT / "knowledge_base" / "chunk_metadata.json",
         description="Path to literature chunk metadata JSON file",
     )
     ARTIFACT_DIR: Path = Field(
-        default=Path("./artifacts"),
+        default_factory=lambda: BACKEND_DIR / "artifacts",
         description="Directory to store generated XAI heatmaps and overlays",
     )
 
@@ -81,8 +85,34 @@ class Settings(BaseSettings):
     @field_validator("MODEL_PATH", "FAISS_PATH", "METADATA_PATH", "ARTIFACT_DIR", mode="after")
     @classmethod
     def resolve_paths(cls, value: Path) -> Path:
-        """Resolve path to absolute path relative to current working directory."""
-        return value.resolve() if value else value
+        """Resolve path to a stable project-relative absolute path.
+
+        Handles execution from either the repository root or backend working directory,
+        while strictly preserving user environment variable overrides.
+        """
+        if not value:
+            return value
+
+        # If already absolute, return normalized absolute path
+        if value.is_absolute():
+            return value.resolve()
+
+        # Check if relative to BACKEND_DIR (e.g. "../models/...", "./artifacts")
+        candidate_backend = (BACKEND_DIR / value).resolve()
+        if candidate_backend.exists():
+            return candidate_backend
+
+        # Check if relative to PROJECT_ROOT (e.g. "models/...", "knowledge_base/...")
+        candidate_root = (PROJECT_ROOT / value).resolve()
+        if candidate_root.exists():
+            return candidate_root
+
+        # If path does not exist yet (e.g. artifacts directory before creation),
+        # anchor artifacts to BACKEND_DIR and others to candidate_backend
+        if "artifact" in str(value).lower():
+            return candidate_backend
+
+        return candidate_backend
 
 
 # Singleton instance for application-wide import

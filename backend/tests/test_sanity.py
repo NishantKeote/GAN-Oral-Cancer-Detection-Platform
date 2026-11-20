@@ -1,10 +1,10 @@
-"""Sanity test verifying configuration defaults and directory structures."""
+"""Sanity test verifying configuration defaults, directory structures, and service modules."""
 
 from pathlib import Path
 
 
 def test_directory_structure():
-    """Verify backend structure conforms to Phase 1A blueprint."""
+    """Verify backend structure conforms to Phase 1G blueprint."""
     backend_root = Path(__file__).parent.parent
     assert (backend_root / "app").is_dir()
     assert (backend_root / "app" / "core").is_dir()
@@ -14,6 +14,29 @@ def test_directory_structure():
     assert (backend_root / "artifacts").is_dir()
     assert (backend_root / "requirements.txt").is_file()
     assert (backend_root / ".env.example").is_file()
+
+
+def test_service_modules():
+    """Verify all six core services are implemented in services/."""
+    services_dir = Path(__file__).parent.parent / "app" / "services"
+    expected_services = [
+        "vision_service.py",
+        "xai_service.py",
+        "rag_service.py",
+        "graph_service.py",
+        "report_service.py",
+        "analysis_service.py",
+    ]
+    for svc in expected_services:
+        assert (services_dir / svc).is_file(), f"Missing service file: {svc}"
+
+
+def test_model_and_index_resources():
+    """Verify model weights and FAISS knowledge base files exist."""
+    project_root = Path(__file__).parent.parent.parent
+    assert (project_root / "models" / "best_efficientnetb0.keras").is_file()
+    assert (project_root / "knowledge_base" / "oscc_literature.faiss").is_file()
+    assert (project_root / "knowledge_base" / "chunk_metadata.json").is_file()
 
 
 def test_requirements_file():
